@@ -1,0 +1,435 @@
+local library = {}
+local tweenservice = game:GetService("TweenService")
+library.theme = {
+    background_color = Color3.fromRGB(25, 25, 25),
+    accent_color = Color3.fromRGB(118, 37, 54)
+}
+function darken(Color, Delta)
+    local H,S,V = Color:ToHSV()
+    return Color3.fromHSV(H,S,V+(Delta/255))
+end
+library.new = function(text1, text2)
+    local nrvlib = Instance.new("ScreenGui")
+    local main = Instance.new("Frame")
+    local title = Instance.new("TextLabel")
+    local version = Instance.new("TextLabel")
+    local gradient = Instance.new("Frame")
+    local gradient1 = Instance.new("UIGradient")
+    local tab_buttons = Instance.new("Frame")
+    local tblist1 = Instance.new("UIListLayout")
+    local tabs = Instance.new("Frame")
+
+    nrvlib.Name = "nrv-lib"
+    nrvlib.Parent = game.CoreGui
+    nrvlib.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    main.Name = "main"
+    main.Parent = nrvlib
+    main.AnchorPoint = Vector2.new(0.5, 0.5)
+    main.BackgroundColor3 = library.theme.background_color
+    main.BorderSizePixel = 0
+    main.ClipsDescendants = true
+    main.Position = UDim2.new(0.5182482, 0, 0.529661059, 0)
+    main.Size = UDim2.new(0, 423, 0, 265)
+
+    title.Name = "title"
+    title.Parent = main
+    title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1.000
+    title.Position = UDim2.new(0.0304104704, 0, 0, 0)
+    title.Size = UDim2.new(0, 202, 0, 50)
+    title.Font = Enum.Font.Gotham
+    title.Text = text1
+    title.TextColor3 = Color3.fromRGB(195, 195, 195)
+    title.TextSize = 16.000
+    title.TextXAlignment = Enum.TextXAlignment.Left
+
+    version.Name = "version"
+    version.Parent = main
+    version.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    version.BackgroundTransparency = 1.000
+    version.Position = UDim2.new(0.0304104704, 0, 0.0564337745, 0)
+    version.Size = UDim2.new(0, 202, 0, 50)
+    version.Font = Enum.Font.Gotham
+    version.Text = text2
+    version.TextColor3 = Color3.fromRGB(195, 195, 195)
+    version.TextSize = 12.000
+    version.TextXAlignment = Enum.TextXAlignment.Left
+
+    gradient.Name = "gradient"
+    gradient.Parent = main
+    gradient.AnchorPoint = Vector2.new(0.5, 0.5)
+    gradient.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    gradient.BorderSizePixel = 0
+    gradient.Position = UDim2.new(0.499510139, 0, 0.144851223, 0)
+    gradient.Selectable = true
+    gradient.Size = UDim2.new(0, 437, 0, 77)
+    gradient.ZIndex = 0
+
+    gradient1.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, library.theme.accent_color), ColorSequenceKeypoint.new(0.84, library.theme.background_color), ColorSequenceKeypoint.new(1.00, library.theme.background_color)}
+    gradient1.Rotation = 90
+    gradient1.Name = "gradient1"
+    gradient1.Parent = gradient
+
+    tab_buttons.Name = "tab_buttons"
+    tab_buttons.Parent = main
+    tab_buttons.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    tab_buttons.BackgroundTransparency = 1.000
+    tab_buttons.Position = UDim2.new(0.000202296185, 0, 0.188679248, 0)
+    tab_buttons.Size = UDim2.new(0, 422, 0, 26)
+
+    tblist1.Name = "tblist1"
+    tblist1.Parent = tab_buttons
+    tblist1.FillDirection = Enum.FillDirection.Horizontal
+    tblist1.SortOrder = Enum.SortOrder.LayoutOrder
+    tblist1.Padding = UDim.new(0, -1)
+
+    tabs.Name = "tabs"
+    tabs.Parent = main
+    tabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    tabs.BackgroundTransparency = 1.000
+    tabs.Position = UDim2.new(0, 0, 0.286792457, 0)
+    tabs.Size = UDim2.new(0, 423, 0, 189)
+
+    local UserInputService = game:GetService("UserInputService")
+    
+    local gui = main
+    
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+    
+    local function update(input)
+        local delta = input.Position - dragStart
+        gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+    
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    local window = {}
+        window.tabs = {}
+        local tabcount = 0
+        window.newtab = function(text)
+            tabcount = tabcount + 1
+            local tab1_btn = Instance.new("TextButton")
+            local tab = Instance.new("ScrollingFrame")
+            local tab_list1 = Instance.new("UIListLayout")
+            local tab_padding1 = Instance.new("UIPadding")
+
+            tab1_btn.Name = "tab1_btn"
+            tab1_btn.Parent = tab_buttons
+            tab1_btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            tab1_btn.BackgroundTransparency = 1.000
+            tab1_btn.Size = UDim2.new(0, 61, 0, 26)
+            tab1_btn.Font = Enum.Font.Gotham
+            tab1_btn.Text = text
+            tab1_btn.TextColor3 = Color3.fromRGB(195, 195, 195)
+            tab1_btn.TextSize = 14.000
+            tab1_btn.TextWrapped = true
+
+            tab.Name = "tab"
+            tab.Parent = tabs
+            tab.Active = true
+            tab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            tab.BackgroundTransparency = 1.000
+            tab.BorderSizePixel = 0
+            tab.Position = UDim2.new(0.014386693, 0, 0, 0)
+            tab.Size = UDim2.new(0, 410, 0, 183)
+            tab.BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+            tab.ScrollBarThickness = 2
+            tab.TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.pngoll-top.png"
+            tab.Visible = false
+
+            tab_list1.Name = "tab_list1"
+            tab_list1.Parent = tab
+            tab_list1.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            tab_list1.SortOrder = Enum.SortOrder.LayoutOrder
+            tab_list1.Padding = UDim.new(0, 5)
+
+            tab_padding1.Name = "tab_padding1"
+            tab_padding1.Parent = tab
+            tab_padding1.PaddingBottom = UDim.new(0, 1)
+            tab_padding1.PaddingLeft = UDim.new(0, 1)
+            tab_padding1.PaddingRight = UDim.new(0, 1)
+            tab_padding1.PaddingTop = UDim.new(0, 2)
+
+            table.insert(window.tabs, tabcount, tab)
+            tab1_btn.MouseButton1Click:Connect(function()
+                for i, v in pairs(window.tabs) do
+                    v.Visible = false
+                end
+                tab.Visible = true
+            end)
+
+           
+
+            local _tab = {}
+                _tab.newlabel = function(titles, style)
+                    if style == 1 then
+                        local label_style1 = Instance.new("Frame")
+                        local label_uicorner1 = Instance.new("UICorner")
+                        local label_1 = Instance.new("TextLabel")
+                        local label_padding1 = Instance.new("UIPadding")
+
+                        label_style1.Name = "label_style1"
+                        label_style1.Parent = tab
+                        label_style1.BackgroundColor3 = darken(library.theme.background_color, 5)
+                        label_style1.BorderSizePixel = 0
+                        label_style1.Position = UDim2.new(0.0195121951, 0, 0, 0)
+                        label_style1.Size = UDim2.new(0, 391, 0, 30)
+
+                        label_uicorner1.CornerRadius = UDim.new(0, 2)
+                        label_uicorner1.Name = "label_uicorner1"
+                        label_uicorner1.Parent = label_style1
+
+                        label_1.Name = "label_1"
+                        label_1.Parent = label_style1
+                        label_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        label_1.BackgroundTransparency = 1.000
+                        label_1.Size = UDim2.new(0, 391, 0, 30)
+                        label_1.Font = Enum.Font.Gotham
+                        label_1.Text = titles[1]
+                        label_1.TextColor3 = Color3.fromRGB(195, 195, 195)
+                        label_1.TextSize = 14.000
+
+                        label_padding1.Name = "label_padding1"
+                        label_padding1.Parent = label_1
+                        label_padding1.PaddingBottom = UDim.new(0, 1)
+                        label_padding1.PaddingLeft = UDim.new(0, 5)
+                        label_padding1.PaddingRight = UDim.new(0, 1)
+                        label_padding1.PaddingTop = UDim.new(0, 1)
+                    elseif style == 2 then
+                        local label_style2 = Instance.new("Frame")
+                        local labels2_uicorner1 = Instance.new("UICorner")
+                        local labels2_1 = Instance.new("TextLabel")
+                        local labels2_padding1 = Instance.new("UIPadding")
+                        local labels2_2 = Instance.new("TextLabel")
+                        local labels2_padding2 = Instance.new("UIPadding")
+
+                        label_style2.Name = "label_style2"
+                        label_style2.Parent = tab
+                        label_style2.BackgroundColor3 = darken(library.theme.background_color, 5)
+                        label_style2.BorderSizePixel = 0
+                        label_style2.Position = UDim2.new(0.023170732, 0, 0.202185795, 0)
+                        label_style2.Size = UDim2.new(0, 391, 0, 47)
+                       
+                        labels2_uicorner1.CornerRadius = UDim.new(0, 2)
+                        labels2_uicorner1.Name = "labels2_uicorner1"
+                        labels2_uicorner1.Parent = label_style2
+                       
+                        labels2_1.Name = "labels2_1"
+                        labels2_1.Parent = label_style2
+                        labels2_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        labels2_1.BackgroundTransparency = 1.000
+                        labels2_1.Size = UDim2.new(0, 391, 0, 30)
+                        labels2_1.Font = Enum.Font.GothamSemibold
+                        labels2_1.Text = titles[1]
+                        labels2_1.TextColor3 = Color3.fromRGB(195, 195, 195)
+                        labels2_1.TextSize = 14.000
+                        labels2_1.TextXAlignment = Enum.TextXAlignment.Left
+                       
+                        labels2_padding1.Name = "labels2_padding1"
+                        labels2_padding1.Parent = labels2_1
+                        labels2_padding1.PaddingBottom = UDim.new(0, 1)
+                        labels2_padding1.PaddingLeft = UDim.new(0, 5)
+                        labels2_padding1.PaddingRight = UDim.new(0, 1)
+                        labels2_padding1.PaddingTop = UDim.new(0, 1)
+                       
+                        labels2_2.Name = "labels2_2"
+                        labels2_2.Parent = label_style2
+                        labels2_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        labels2_2.BackgroundTransparency = 1.000
+                        labels2_2.Position = UDim2.new(0, 0, 0.418181837, 0)
+                        labels2_2.Size = UDim2.new(0, 391, 0, 25)
+                        labels2_2.Font = Enum.Font.Gotham
+                        labels2_2.Text = titles[2]
+                        labels2_2.TextColor3 = Color3.fromRGB(195, 195, 195)
+                        labels2_2.TextSize = 14.000
+                        labels2_2.TextXAlignment = Enum.TextXAlignment.Left
+                       
+                        labels2_padding2.Name = "labels2_padding2"
+                        labels2_padding2.Parent = labels2_2
+                        labels2_padding2.PaddingBottom = UDim.new(0, 1)
+                        labels2_padding2.PaddingLeft = UDim.new(0, 5)
+                        labels2_padding2.PaddingRight = UDim.new(0, 1)
+                        labels2_padding2.PaddingTop = UDim.new(0, 1)
+                    end
+                    tab.CanvasSize = UDim2.fromOffset(tab.Size.X.Offset / 2 - 17, tab.tab_list1.AbsoluteContentSize.Y + 18)
+                end
+                _tab.newbutton = function(text, callback)
+                    callback = callback or function(...) return end
+                    local button_style1 = Instance.new("Frame")
+                    local button_uicorner1 = Instance.new("UICorner")
+                    local button_1 = Instance.new("TextButton")
+                    local button_padding1 = Instance.new("UIPadding")
+
+                    button_style1.Name = "button_style1"
+                    button_style1.Parent = tab
+                    button_style1.BackgroundColor3 = darken(library.theme.background_color, 5)
+                    button_style1.BorderSizePixel = 0
+                    button_style1.Position = UDim2.new(0.0195121951, 0, 0, 0)
+                    button_style1.Size = UDim2.new(0, 391, 0, 30)
+
+                    button_uicorner1.CornerRadius = UDim.new(0, 2)
+                    button_uicorner1.Name = "button_uicorner1"
+                    button_uicorner1.Parent = button_style1
+
+                    button_1.Name = "button_1"
+                    button_1.Parent = button_style1
+                    button_1.Active = false
+                    button_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    button_1.BackgroundTransparency = 1.000
+                    button_1.Selectable = false
+                    button_1.Size = UDim2.new(0, 391, 0, 30)
+                    button_1.Font = Enum.Font.Gotham
+                    button_1.Text = text
+                    button_1.TextColor3 = Color3.fromRGB(195, 195, 195)
+                    button_1.TextSize = 14.000
+                    button_1.TextWrapped = true
+                    button_1.TextXAlignment = Enum.TextXAlignment.Left
+
+                    button_padding1.Name = "button_padding1"
+                    button_padding1.Parent = button_1
+                    button_padding1.PaddingBottom = UDim.new(0, 1)
+                    button_padding1.PaddingLeft = UDim.new(0, 5)
+                    button_padding1.PaddingRight = UDim.new(0, 1)
+                    button_padding1.PaddingTop = UDim.new(0, 1)
+
+                    button_1.MouseButton1Click:Connect(function()
+                        pcall(callback)
+                    end)
+                    tab.CanvasSize = UDim2.fromOffset(tab.Size.X.Offset / 2 - 17, tab.tab_list1.AbsoluteContentSize.Y + 18)
+                end
+                _tab.newtoggle = function(text, default, callback)
+                    callback = callback or function(...) return end
+                    local toggled = default or false
+                    local toggle_style1 = Instance.new("Frame")
+                    local toggle_uicorner1 = Instance.new("UICorner")
+                    local toggle_1 = Instance.new("TextLabel")
+                    local toggle_padding1 = Instance.new("UIPadding")
+                    local toggle_button = Instance.new("TextButton")
+                    local toggle_uicorner2 = Instance.new("UICorner")
+                    local checkmark = Instance.new("ImageLabel")
+                    local toggle_uicorner3 = Instance.new("UICorner")
+
+                    toggle_style1.Name = "toggle_style1"
+                    toggle_style1.Parent = tab
+                    toggle_style1.BackgroundColor3 = darken(library.theme.background_color, 5)
+                    toggle_style1.BorderSizePixel = 0
+                    toggle_style1.Position = UDim2.new(0.0195121951, 0, 0, 0)
+                    toggle_style1.Size = UDim2.new(0, 391, 0, 30)
+
+                    toggle_uicorner1.CornerRadius = UDim.new(0, 2)
+                    toggle_uicorner1.Name = "toggle_uicorner1"
+                    toggle_uicorner1.Parent = toggle_style1
+
+                    toggle_1.Name = "toggle_1"
+                    toggle_1.Parent = toggle_style1
+                    toggle_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    toggle_1.BackgroundTransparency = 1.000
+                    toggle_1.Position = UDim2.new(0.0792838857, 0, 0, 0)
+                    toggle_1.Size = UDim2.new(0, 360, 0, 30)
+                    toggle_1.Font = Enum.Font.Gotham
+                    toggle_1.Text = text
+                    toggle_1.TextColor3 = Color3.fromRGB(195, 195, 195)
+                    toggle_1.TextSize = 14.000
+                    toggle_1.TextWrapped = true
+                    toggle_1.TextXAlignment = Enum.TextXAlignment.Left
+
+                    toggle_padding1.Name = "toggle_padding1"
+                    toggle_padding1.Parent = toggle_1
+                    toggle_padding1.PaddingBottom = UDim.new(0, 1)
+                    toggle_padding1.PaddingLeft = UDim.new(0, 5)
+                    toggle_padding1.PaddingRight = UDim.new(0, 1)
+                    toggle_padding1.PaddingTop = UDim.new(0, 1)
+
+                    toggle_button.Name = "toggle_button"
+                    toggle_button.Parent = toggle_style1
+                    toggle_button.BackgroundColor3 = library.theme.accent_color
+                    toggle_button.BorderSizePixel = 0
+                    toggle_button.Position = UDim2.new(0.017902812, 0, 0.233333334, 0)
+                    toggle_button.Size = UDim2.new(0, 16, 0, 16)
+                    toggle_button.Font = Enum.Font.SourceSans
+                    toggle_button.Text = " "
+                    toggle_button.TextColor3 = Color3.fromRGB(0, 0, 0)
+                    toggle_button.TextSize = 14.000
+
+                    toggle_uicorner2.CornerRadius = UDim.new(0, 2)
+                    toggle_uicorner2.Name = "toggle_uicorner2"
+                    toggle_uicorner2.Parent = toggle_button
+
+                    checkmark.Name = "checkmark"
+                    checkmark.Parent = toggle_button
+                    checkmark.BackgroundColor3 = darken(library.theme.background_color, 5)
+                    checkmark.BorderSizePixel = 0
+                    checkmark.Position = UDim2.new(0.055555582, 0, 0.06555582, 0)
+                    checkmark.Size = UDim2.new(0, 14, 0, 14)
+                    checkmark.Image = "rbxassetid://3926305904"
+                    checkmark.ImageColor3 = library.theme.accent_color
+                    checkmark.ImageRectOffset = Vector2.new(312, 4)
+                    checkmark.ImageRectSize = Vector2.new(24, 24)
+                    checkmark.ImageTransparency = 1
+
+                    toggle_uicorner3.CornerRadius = UDim.new(0, 2)
+                    toggle_uicorner3.Name = "toggle_uicorner3"
+                    toggle_uicorner3.Parent = checkmark
+                    if toggled == true then
+                        toggled = false
+                        local tweeninfo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+                        local tween = tweenservice:Create(checkmark, tweeninfo, {ImageTransparency = 1})
+                        tween:Play()
+                        pcall(callback, toggled)
+                    elseif toogled == false then
+                        toggled = true
+                        local tweeninfo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+                        local tween = tweenservice:Create(checkmark, tweeninfo, {ImageTransparency = 0})
+                        tween:Play()
+                        pcall(callback, toggled)
+                    end
+
+                    toggle_button.MouseButton1Click:Connect(function()
+                        if toggled == true then
+                            toggled = false
+                            local tweeninfo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+                            local tween = tweenservice:Create(checkmark, tweeninfo, {ImageTransparency = 1})
+                            tween:Play()
+                            pcall(callback, toggled)
+                        else
+                            toggled = true
+                            local tweeninfo = TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+                            local tween = tweenservice:Create(checkmark, tweeninfo, {ImageTransparency = 0})
+                            tween:Play()
+                            pcall(callback, toggled)
+                        end
+                    end)
+                end
+            return _tab;
+        end
+    return window;
+end
+return library
